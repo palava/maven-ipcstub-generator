@@ -21,15 +21,17 @@ package de.cosmocode.palava.ipc.connector.json.php.maven;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 /**
+ * 
+ * 
  * @author Tobias Sarnowski
  */
 public class PhpStubGenerator extends AbstractMojo {
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException {
         getLog().info("hello world");
     }
+    
 }
