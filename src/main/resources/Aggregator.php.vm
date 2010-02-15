@@ -1,0 +1,12 @@
+<?php
+#if ($legalText)
+/**
+ * $legalText
+ */
+#end
+#if ($php53)
+namespace $namespace
+#end
+
+
+?>
