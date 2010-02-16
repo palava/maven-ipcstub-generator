@@ -7,14 +7,14 @@
 		<version>2.0-SNAPSHOT</version>
 	</parent>
 
-	<name>Palava IPC Connector JSON-PHP Maven</name>
-	<artifactId>palava-ipc-connector-json-php-maven</artifactId>
+	<name>Palava IPC Maven Stub Generator</name>
+	<artifactId>maven-ipcstub-generator</artifactId>
 	<version>0.1-SNAPSHOT</version>
 
     <packaging>maven-plugin</packaging>
 
 	<scm>
-		<developerConnection>scm:svn:https://palava.svn.cosmocode.de/palava-ipc-connector-json-php-maven/trunk</developerConnection>
+		<developerConnection>scm:svn:https://palava.svn.cosmocode.de/maven-ipcstub-generator/trunk</developerConnection>
 	</scm>
 
 	<dependencies>
@@ -34,6 +34,18 @@
 			<artifactId>palava-ipc</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
 	</dependencies>
 
     <build>

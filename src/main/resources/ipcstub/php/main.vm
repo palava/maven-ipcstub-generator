@@ -1,0 +1,1 @@
+$generator.generateFile("IPCStubs.php", "IPCStubs", "")

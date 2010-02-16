@@ -1,0 +1,34 @@
+$generator.includeFile("php_header")
+
+#foreach($pkg in $args.getPackages())
+#set ($name = $pkg.getFullName().replace(".", "__"))
+require('IPCStub___${name}.php');
+#end
+
+class IPCStub___$args.getFullName().replace(".", "__") {
+
+    private $palava;
+
+#foreach($pkg in $args.getPackages())
+    public IPCStub___$pkg.getFullName().replace(".", "__") $$pkg.getName();
+#end
+
+    public function __construct($palava) {
+        $this->palava = $palava;
+#foreach($pkg in $args.getPackages())
+        $this->$pkg.getName() = new IPCStub___$pkg.getFullName().replace(".", "__")($palava);
+#end
+    }
+
+#foreach($command in $args.getCommands())
+    public ${command.getName()}() {
+        $this->palava->call("${command.getFullName()}");
+    }
+
+#end
+}
+#foreach($pkg in $args.getPackages())
+#set ($name = $pkg.getFullName().replace(".", "__"))
+$generator.generateFile("IPCStub___${name}.php", "IPCStub", $pkg)
+#end
+$generator.includeFile("php_footer")
