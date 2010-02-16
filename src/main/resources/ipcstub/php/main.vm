@@ -1,1 +1,1 @@
-$generator.generateFile("IPCStubs.php", "IPCStubs", "")
+$generator.generateFile("IPCStubs_${generator.getName()}.php", "IPCStubs", "")
