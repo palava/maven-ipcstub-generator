@@ -135,7 +135,7 @@ public class Generator implements LogChute {
     }
 
     private String getResourcePath(String resource) {
-        return "ipcstub/" + scheme + "/" + resource + ".vm";
+        return "/ipcstub/" + scheme + "/" + resource + ".vm";
     }
 
     public String getGenerationDate() {
