@@ -72,10 +72,10 @@ public class Generator implements LogChute {
     private Map<String,String> aliases;
 
     /**
-     * If a separate zip file should be generated from the output. NOT YET IMPLEMENTED.
+     * Where to store the outputed files.
      * @parameter
      */
-    private boolean generateZip;
+    private String target;
 
     /**
      * A coypright notice or something else to include in the stub.
@@ -109,8 +109,8 @@ public class Generator implements LogChute {
         return aliases;
     }
 
-    public boolean willGenerateZip() {
-        return generateZip;
+    public String getTarget() {
+        return target;
     }
 
     public String getLegalText() {
@@ -150,7 +150,11 @@ public class Generator implements LogChute {
      */
     protected void generate(Log log, Set<Class> classes, File targetDirectory) throws MojoExecutionException, MojoFailureException {
         LOG = log;
-        this.targetDirectory = targetDirectory;
+        if (target == null) {
+            this.targetDirectory = targetDirectory;
+        } else {
+            this.targetDirectory = new File(target);
+        }
         generationDate = new Date();
 
         // initialize the Velocity engine

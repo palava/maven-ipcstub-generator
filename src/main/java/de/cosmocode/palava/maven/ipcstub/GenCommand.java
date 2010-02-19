@@ -31,13 +31,14 @@ import java.lang.annotation.Annotation;
  */
 public class GenCommand {
     // the command to inspect
-    private Class command;
+    private Class<?> command;
 
     protected GenCommand(Class command) {
         this.command = command;
     }
 
-    private Annotation getAnnotation(String annotationName) throws MojoExecutionException {
+    /*
+    private <T> T getAnnotation(Class<T> annotationName) throws MojoExecutionException {
         try {
             Class annotation = command.getClassLoader().loadClass(annotationName);
             return command.getAnnotation(annotation);
@@ -45,6 +46,7 @@ public class GenCommand {
             throw new MojoExecutionException("cannot load @" + annotationName + " annotation", e);
         }
     }
+    */
 
     public String getName() {
         return command.getSimpleName();
@@ -54,9 +56,18 @@ public class GenCommand {
         return command.getName();
     }
 
+    public boolean hasMetaInformations() {
+        return true;
+    }
+
     public String getDescription() throws MojoExecutionException {
-        Annotation annotation = getAnnotation(IpcCommand.Description.class.getName());
-        return null;
+        //Annotation annotation = getAnnotation(IpcCommand.Description.class.getName());
+        IpcCommand.Description description = command.getAnnotation(IpcCommand.Description.class);
+        if (description != null) {
+            return description.value();
+        } else {
+            return "";
+        }
     }
 
 }

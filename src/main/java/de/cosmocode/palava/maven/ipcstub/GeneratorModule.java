@@ -23,6 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import de.cosmocode.palava.ipc.IpcCommand;
 
+import de.cosmocode.palava.ipc.inspector.Inspector;
+import de.cosmocode.palava.ipc.inspector.InspectorException;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -143,84 +145,10 @@ public class GeneratorModule extends AbstractMojo {
         }
         URL[] urls = locations.toArray(new URL[locations.size()]);
 
-        ClassLoader classLoader = new URLClassLoader(urls);
-        Class ipcCommandClass;
         try {
-            ipcCommandClass = classLoader.loadClass(IpcCommand.class.getName());
-        } catch (ClassNotFoundException e) {
-            throw new MojoExecutionException("IpcCommand definition not found", e);
-        }
-
-        // search for all classes in the specified packages
-        Set<Class> foundCommands = Sets.newHashSet();
-        for (URL url: urls) {
-            File file = new File(url.getFile());
-            if (file.isFile()) {
-                parseJar(file, foundCommands, ipcCommandClass, packages, classLoader);
-            } else {
-                parseDir(file, file, foundCommands, ipcCommandClass, packages, classLoader);
-            }
-        }
-        return foundCommands;
-    }
-
-    private void parseDir(File root, File dir, Set<Class> foundCommands, Class ipcCommandClass, Set<String> packages, ClassLoader classLoader) {
-        for (File file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                parseDir(root, file, foundCommands, ipcCommandClass, packages, classLoader);
-            } else {
-                final String path = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
-                if (path.endsWith(".class")) {
-                    final String className = path.substring(0, path.length() - ".class".length()).replace('/', '.');
-                    checkAndAdd(className, foundCommands, ipcCommandClass, packages, classLoader);
-                }
-            }
-        }
-    }
-
-    private void parseJar(File jarFile, Set<Class> foundCommands, Class ipcCommandClass, Set<String> packages, ClassLoader classLoader) throws MojoExecutionException {
-        try {
-            final JarInputStream jar = new JarInputStream(new FileInputStream(jarFile));
-
-            while (true) {
-                final JarEntry jarEntry = jar.getNextJarEntry();
-                if (jarEntry == null) {
-                    break;
-                }
-                if (jarEntry.getName().endsWith(".class")) {
-                    final String className = jarEntry.getName().substring(
-                        0, jarEntry.getName().length() - ".class".length()
-                    ).replace('/', '.');
-                    checkAndAdd(className, foundCommands, ipcCommandClass, packages, classLoader);
-                }
-            }
-        } catch (IOException e) {
-            throw new MojoExecutionException("failed to read jarfile " + jarFile, e);
-        }
-    }
-
-    private void checkAndAdd(String clsName, Set<Class> foundCommands, Class ipcCommandClass, Set<String> packages, ClassLoader classLoader) {
-        boolean found = false;
-        for (String pkg: packages) {
-            if (clsName.startsWith(pkg + ".")) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            return;
-        }
-        final Class cls;
-        try {
-            cls = classLoader.loadClass(clsName);
-        } catch (ClassNotFoundException e) {
-            return;
-        }
-        if (ipcCommandClass.isAssignableFrom(cls)) {
-            if (cls.isInterface() || Modifier.isAbstract(cls.getModifiers()) || cls.isArray() || cls.isEnum()) {
-                return;
-            }
-            foundCommands.add(cls);
+            return Inspector.generateCommandList(packages, urls);
+        } catch (InspectorException e) {
+            throw new MojoExecutionException("cannot generate list of commands", e);
         }
     }
 }

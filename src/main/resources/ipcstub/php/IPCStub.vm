@@ -21,6 +21,15 @@ class IPCStub_$generator.getName()___$args.getFullName().replace(".", "__") {
     }
 
 #foreach($command in $args.getCommands())
+    #if ($command.hasMetaInformations())
+    /**
+        #if ($command.getDescription() != "")
+            #foreach($line in $command.getDescription().trim().split("\n"))
+     * $line.trim()
+            #end
+        #end
+     */
+    #end
     public ${command.getName()}() {
         $this->palava->call("${command.getFullName()}");
     }
