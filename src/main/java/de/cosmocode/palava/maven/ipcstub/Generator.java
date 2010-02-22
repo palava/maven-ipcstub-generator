@@ -20,6 +20,7 @@
 package de.cosmocode.palava.maven.ipcstub;
 
 import com.google.common.collect.Maps;
+import de.cosmocode.palava.ipc.IpcCommand;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -148,7 +149,7 @@ public class Generator implements LogChute {
      * @param log the maven logger
      * @param classes all requested IpcCommands
      */
-    protected void generate(Log log, Set<Class> classes, File targetDirectory) throws MojoExecutionException, MojoFailureException {
+    protected void generate(Log log, Set<Class<? extends IpcCommand>> classes, File targetDirectory) throws MojoExecutionException, MojoFailureException {
         LOG = log;
         if (target == null) {
             this.targetDirectory = targetDirectory;

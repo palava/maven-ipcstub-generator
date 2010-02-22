@@ -20,6 +20,7 @@
 package de.cosmocode.palava.maven.ipcstub;
 
 import com.google.common.collect.Sets;
+import de.cosmocode.palava.ipc.IpcCommand;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.util.Set;
@@ -86,10 +87,10 @@ public class GenPackage {
      * @param classes all commands to process
      * @return the new tree structure
      */
-    protected static Set<GenPackage> getFirstPackages(Set<Class> classes, GenPackage parent) throws MojoExecutionException {
+    protected static Set<GenPackage> getFirstPackages(Set<Class<? extends IpcCommand>> classes, GenPackage parent) throws MojoExecutionException {
         Set<GenPackage> packages = Sets.newHashSet();
 
-        for (Class command: classes) {
+        for (Class<? extends IpcCommand> command: classes) {
             // within the right package?
             String className;
             if (parent != null) {

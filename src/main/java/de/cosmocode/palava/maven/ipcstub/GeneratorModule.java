@@ -103,12 +103,12 @@ public class GeneratorModule extends AbstractMojo {
         }
 
         // search for IpcCommands in all required packages
-        Set<Class> foundClasses = generateCommandList(allPackages);
+        Set<Class<? extends IpcCommand>> foundClasses = generateCommandList(allPackages);
         LOG.info("Found " + foundClasses.size() + " IpcCommands; generating stubs...");
 
         // filter classes and let the generators do their work
         for (Generator generator: generators) {
-            Set<Class> filteredClasses = Sets.newHashSet();
+            Set<Class<? extends IpcCommand>> filteredClasses = Sets.newHashSet();
             for (Class foundClass: foundClasses) {
                 boolean found = false;
                 for (String requiredPackage: generator.getPackages()) {
@@ -130,7 +130,7 @@ public class GeneratorModule extends AbstractMojo {
         }
     }
 
-    private Set<Class> generateCommandList(Set<String> packages) throws MojoExecutionException {
+    private Set<Class<? extends IpcCommand>> generateCommandList(Set<String> packages) throws MojoExecutionException {
         // create the classpath to use
         List<URL> locations = Lists.newArrayList();
         try {
@@ -144,6 +144,9 @@ public class GeneratorModule extends AbstractMojo {
             throw new MojoExecutionException("dependency with malformed url", e);
         }
         URL[] urls = locations.toArray(new URL[locations.size()]);
+
+        // hack: add the required files to the classloader
+        Inspector.boostrapInspector(urls);
 
         try {
             return Inspector.generateCommandList(packages, urls);

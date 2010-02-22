@@ -20,6 +20,7 @@
 package de.cosmocode.palava.maven.ipcstub;
 
 import de.cosmocode.palava.ipc.IpcCommand;
+import de.cosmocode.palava.ipc.inspector.InspectedCommand;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,22 +32,11 @@ import java.lang.annotation.Annotation;
  */
 public class GenCommand {
     // the command to inspect
-    private Class<?> command;
+    private Class<? extends IpcCommand> command;
 
-    protected GenCommand(Class command) {
+    protected GenCommand(Class<? extends IpcCommand> command) {
         this.command = command;
     }
-
-    /*
-    private <T> T getAnnotation(Class<T> annotationName) throws MojoExecutionException {
-        try {
-            Class annotation = command.getClassLoader().loadClass(annotationName);
-            return command.getAnnotation(annotation);
-        } catch (ClassNotFoundException e) {
-            throw new MojoExecutionException("cannot load @" + annotationName + " annotation", e);
-        }
-    }
-    */
 
     public String getName() {
         return command.getSimpleName();
@@ -56,18 +46,7 @@ public class GenCommand {
         return command.getName();
     }
 
-    public boolean hasMetaInformations() {
-        return true;
+    public InspectedCommand getMeta() {
+        return InspectedCommand.inspectCommand(command);
     }
-
-    public String getDescription() throws MojoExecutionException {
-        //Annotation annotation = getAnnotation(IpcCommand.Description.class.getName());
-        IpcCommand.Description description = command.getAnnotation(IpcCommand.Description.class);
-        if (description != null) {
-            return description.value();
-        } else {
-            return "";
-        }
-    }
-
 }
