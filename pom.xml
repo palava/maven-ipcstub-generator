@@ -56,6 +56,20 @@
         </dependency>
 	</dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>cosmocode-public-releases</id>
+            <name>CosmoCode public releases</name>
+            <url>scp://mvn.cosmocode.de:6589/var/www/mvn/</url>
+        </repository>
+        <snapshotRepository>
+            <id>cosmocode-private-snapshots</id>
+            <name>CosmoCode private snapshots</name>
+            <url>http://mvn.cosmo/plugins-snapshots-local/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
     <build>
         <plugins>
             <plugin>

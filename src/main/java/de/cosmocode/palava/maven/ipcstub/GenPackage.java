@@ -36,10 +36,10 @@ public class GenPackage {
     private GenPackage parent;
 
     // list of all subpackages
-    private Set<GenPackage> packages = Sets.newHashSet();
+    private Set<GenPackage> packages = Sets.newLinkedHashSet();
 
     // list of all commands in this package
-    private Set<GenCommand> commands = Sets.newHashSet();
+    private Set<GenCommand> commands = Sets.newLinkedHashSet();
 
 
     protected GenPackage(String name, GenPackage parent) {
@@ -88,7 +88,7 @@ public class GenPackage {
      * @return the new tree structure
      */
     protected static Set<GenPackage> getFirstPackages(Set<Class<? extends IpcCommand>> classes, GenPackage parent) throws MojoExecutionException {
-        Set<GenPackage> packages = Sets.newHashSet();
+        Set<GenPackage> packages = Sets.newLinkedHashSet();
 
         for (Class<? extends IpcCommand> command: classes) {
             // within the right package?

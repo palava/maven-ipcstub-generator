@@ -19,7 +19,9 @@
 
 package de.cosmocode.palava.maven.ipcstub;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import de.cosmocode.palava.ipc.IpcCommand;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -43,7 +45,7 @@ import java.util.*;
  * @author Tobias Sarnowski
  */
 public class Generator implements LogChute {
-    private Log LOG;
+    private Log LOG; 
 
     /**
      * A configuration unique identifier.
@@ -311,4 +313,5 @@ public class Generator implements LogChute {
         }
         return w.toString();
     }
+
 }

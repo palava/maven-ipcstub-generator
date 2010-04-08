@@ -19,7 +19,9 @@
 
 package de.cosmocode.palava.maven.ipcstub;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import de.cosmocode.palava.ipc.IpcCommand;
 
@@ -39,8 +41,10 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -52,6 +56,13 @@ import java.util.jar.JarInputStream;
  */
 public class GeneratorModule extends AbstractMojo {
     private final Log LOG = getLog();
+
+    private static final Comparator<Class<?>> CLASS_COMPARATOR = Ordering.natural().onResultOf(new Function<Class<?>,String>() {
+        @Override
+        public String apply(Class<?> aClass) {
+            return aClass.getName();
+        }
+    });
 
     /**
      * @parameter expression="${project}"
@@ -97,18 +108,21 @@ public class GeneratorModule extends AbstractMojo {
             }
             allPackages.addAll(generator.getPackages());
         }
+
         LOG.info("Searching for IpcCommands in:");
         for (String pkg: allPackages) {
             LOG.info("    " + pkg);
         }
 
         // search for IpcCommands in all required packages
-        Set<Class<? extends IpcCommand>> foundClasses = generateCommandList(allPackages);
+        Set<Class<? extends IpcCommand>> foundClasses = Sets.newTreeSet(CLASS_COMPARATOR);
+        foundClasses.addAll(generateCommandList(allPackages));
+
         LOG.info("Found " + foundClasses.size() + " IpcCommands; generating stubs...");
 
         // filter classes and let the generators do their work
         for (Generator generator: generators) {
-            Set<Class<? extends IpcCommand>> filteredClasses = Sets.newHashSet();
+            Set<Class<? extends IpcCommand>> filteredClasses = Sets.newLinkedHashSet();
             for (Class foundClass: foundClasses) {
                 boolean found = false;
                 for (String requiredPackage: generator.getPackages()) {
