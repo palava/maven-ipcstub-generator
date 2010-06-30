@@ -16,11 +16,13 @@
 
 package de.cosmocode.palava.maven.ipcstub;
 
-import com.google.common.collect.Sets;
-import de.cosmocode.palava.ipc.IpcCommand;
+import java.util.Set;
+
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.util.Set;
+import com.google.common.collect.Sets;
+
+import de.cosmocode.palava.ipc.IpcCommand;
 
 /**
  * @author Tobias Sarnowski

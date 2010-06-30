@@ -16,11 +16,12 @@
 
 package de.cosmocode.palava.maven.ipcstub;
 
-import com.google.common.collect.Lists;
-import de.cosmocode.palava.ipc.IpcCommand;
-
 import java.lang.annotation.Annotation;
 import java.util.List;
+
+import com.google.common.collect.Lists;
+
+import de.cosmocode.palava.ipc.IpcCommand;
 
 /**
  * @author Tobias Sarnowski

@@ -16,20 +16,6 @@
 
 package de.cosmocode.palava.maven.ipcstub;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
-import com.google.gag.annotation.remark.OhNoYouDidnt;
-import de.cosmocode.classpath.ClassPath;
-import de.cosmocode.palava.ipc.IpcCommand;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -39,6 +25,22 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
+import com.google.gag.annotation.remark.OhNoYouDidnt;
+
+import de.cosmocode.classpath.ClassPath;
+import de.cosmocode.palava.ipc.IpcCommand;
 
 /**
  * @description Generates stub files for all found IpcCommands in the classpath.
