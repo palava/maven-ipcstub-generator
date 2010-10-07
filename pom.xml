@@ -7,10 +7,10 @@
   </parent>
   <name>Palava IPC Maven Stub Generator</name>
   <artifactId>maven-ipcstub-generator</artifactId>
-  <version>1.1.0</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <scm>
-    <developerConnection>scm:svn:https://palava.svn.cosmocode.de/maven-ipcstub-generator/tags/1.1.0</developerConnection>
+    <developerConnection>scm:svn:https://palava.svn.cosmocode.de/maven-ipcstub-generator/trunk</developerConnection>
   </scm>
   <repositories>
     <repository>
