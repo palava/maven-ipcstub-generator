@@ -34,6 +34,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.LogChute;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.codehaus.plexus.util.StringUtils;
 
 import com.google.common.collect.Maps;
 
@@ -44,7 +46,8 @@ import de.cosmocode.palava.ipc.IpcCommand;
  * @author Tobias Sarnowski
  */
 public class Generator implements LogChute {
-    private Log LOG; 
+    
+    private Log log; 
 
     /**
      * A configuration unique identifier.
@@ -71,7 +74,7 @@ public class Generator implements LogChute {
      * Map of aliases to generate within the stub.
      * @parameter
      */
-    private Map<String,String> aliases;
+    private Map<String, String> aliases;
 
     /**
      * Where to store the outputed files.
@@ -85,15 +88,17 @@ public class Generator implements LogChute {
      */
     private String legalText;
 
-    /**
-     * Encoding to use.
-     * @parameter
-     */
-    private String encoding;
-
     // use to know the common generation date;
     private Date generationDate;
 
+    // the engine instance;
+    private VelocityEngine engine;
+
+    // will be set on generate()
+    private File targetDirectory;
+
+    // will be generated on generate()
+    private Set<GenPackage> rootPackages;
 
     public String getName() {
         return name;
@@ -119,19 +124,6 @@ public class Generator implements LogChute {
         return legalText;
     }
 
-    // the engine instance;
-    private VelocityEngine engine;
-
-    // will be set on generate()
-    private File targetDirectory;
-
-    // will be generated on generate()
-    private Set<GenPackage> rootPackages;
-
-    // list of temporary files to cleanup
-    private Map<String,Template> templates = Maps.newHashMap();
-
-
     public Set<GenPackage> getRootPackages() {
         return rootPackages;
     }
@@ -141,32 +133,53 @@ public class Generator implements LogChute {
     }
 
     public String getGenerationDate() {
-        SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
-        return format.format(generationDate);
+        return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z").format(generationDate);
+    }
+    
+    /**
+     * Checks whether this generator contains a valid name, scheme and packages.
+     *
+     * @throws MojoFailureException if check failed
+     */
+    public void check() throws MojoFailureException {
+        if (StringUtils.isBlank(getName())) {
+            throw new MojoFailureException("no classifier configured for configuration");
+        }
+        if (StringUtils.isBlank(getScheme())) {
+            throw new MojoFailureException("no template configured for configuration '" + getName() + "'");
+        }
+        if (getPackages() == null || getPackages().size() == 0) {
+            throw new MojoFailureException("no packages configured for configuration '" + getName() + "'");
+        }
     }
 
     /**
      * Generates the stub files with the given list of IpcCommand classes.
-     * @param log the maven logger
+     * 
+     * @param currentLog the maven logger
      * @param classes all requested IpcCommands
+     * @param directory the target directory
+     * @throws MojoExecutionException if execution failed
+     * @throws MojoFailureException if any fatal error occured
      */
-    protected void generate(Log log, Set<Class<? extends IpcCommand>> classes, File targetDirectory) throws MojoExecutionException, MojoFailureException {
-        LOG = log;
-        if (target == null) {
-            this.targetDirectory = targetDirectory;
-        } else {
-            this.targetDirectory = new File(target);
-        }
-        generationDate = new Date();
+    protected void generate(Log currentLog, Set<Class<? extends IpcCommand>> classes, File directory) 
+        throws MojoExecutionException, MojoFailureException {
+        
+        this.log = currentLog;
+        this.targetDirectory = target == null ? directory : new File(target); 
+        this.generationDate = new Date();
 
         // initialize the Velocity engine
         engine = new VelocityEngine();
         engine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, this);
         engine.setProperty(VelocityEngine.RESOURCE_LOADER, "class");
-        engine.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        engine.setProperty("class.resource.loader.class", ClasspathResourceLoader.class.getName());
+        
         try {
             engine.init();
+        /* CHECKSTYLE:OFF */
         } catch (Exception e) {
+        /* CHECKSTYLE:ON */
             throw new MojoExecutionException("cannot initialize velocity engine", e);
         }
 
@@ -174,27 +187,32 @@ public class Generator implements LogChute {
         rootPackages = GenPackage.getFirstPackages(classes, null);
 
         // find the scheme to use
-        String templatePath = getResourcePath("main");
-        Template tpl = null;
+        final String templatePath = getResourcePath("main");
+        
+        final Template template;
+        
         try {
-            tpl = engine.getTemplate(templatePath);
+            template = engine.getTemplate(templatePath);
+        /* CHECKSTYLE:OFF */
         } catch (Exception e) {
+        /* CHECKSTYLE:ON */
             throw new MojoFailureException("cannot find scheme " + scheme, e);
         }
 
         // initialize the context
-        VelocityContext ctx = new VelocityContext();
+        final VelocityContext ctx = new VelocityContext();
         ctx.put("generator", this);
 
         // create the target directory
-        if (!targetDirectory.exists() && !targetDirectory.mkdirs()) {
-            throw new MojoExecutionException("cannot create stub directory: " + targetDirectory);
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new MojoExecutionException("cannot create stub directory: " + directory);
         }
 
         // start the generation process within the scheme
-        StringWriter w = new StringWriter();
+        final StringWriter writer = new StringWriter();
         try {
-            tpl.merge(ctx, w);  // scheme have to be in UTF-8
+            // scheme have to be in UTF-8
+            template.merge(ctx, writer);
         } catch (IOException e) {
             throw new MojoExecutionException("cannot merge template", e);
         }
@@ -210,17 +228,18 @@ public class Generator implements LogChute {
         switch (i) {
             case LogChute.TRACE_ID:
             case LogChute.DEBUG_ID:
-                LOG.debug(s);
+                log.debug(s);
                 break;
             case LogChute.INFO_ID:
-                LOG.info(s);
+                log.info(s);
                 break;
             case LogChute.WARN_ID:
-                LOG.warn(s);
+                log.warn(s);
                 break;
             case LogChute.ERROR_ID:
-                LOG.error(s);
+                log.error(s);
                 break;
+            default: 
         }
     }
 
@@ -229,17 +248,18 @@ public class Generator implements LogChute {
         switch (i) {
             case LogChute.TRACE_ID:
             case LogChute.DEBUG_ID:
-                LOG.debug(s, throwable);
+                log.debug(s, throwable);
                 break;
             case LogChute.INFO_ID:
-                LOG.info(s, throwable);
+                log.info(s, throwable);
                 break;
             case LogChute.WARN_ID:
-                LOG.warn(s, throwable);
+                log.warn(s, throwable);
                 break;
             case LogChute.ERROR_ID:
-                LOG.error(s, throwable);
+                log.error(s, throwable);
                 break;
+            default: 
         }
     }
 
@@ -248,33 +268,45 @@ public class Generator implements LogChute {
         switch (i) {
             case LogChute.TRACE_ID:
             case LogChute.DEBUG_ID:
-                return LOG.isDebugEnabled();
+                return log.isDebugEnabled();
             case LogChute.INFO_ID:
-                return LOG.isInfoEnabled();
+                return log.isInfoEnabled();
             case LogChute.WARN_ID:
-                return LOG.isWarnEnabled();
+                return log.isWarnEnabled();
             case LogChute.ERROR_ID:
-                return LOG.isErrorEnabled();
+                return log.isErrorEnabled();
             default:
                 return false;
         }
     }
 
-    public void generateFile(String generatedFileName, String templateFile, Object args) throws MojoExecutionException, MojoFailureException {
-        File generatedFile = new File(targetDirectory, generatedFileName);
-        File parent = new File(generatedFile.getParent());
-        if (!parent.exists()) {
-            parent.mkdirs();
-        }
+    /**
+     * Generates a file.
+     *
+     * @param generatedFileName the file name
+     * @param templateFile the template file
+     * @param args the arguments
+     * @throws MojoExecutionException if execution failed
+     * @throws MojoFailureException if any fatal error occured
+     */
+    // used by templates
+    public void generateFile(String generatedFileName, String templateFile, Object args) 
+        throws MojoExecutionException, MojoFailureException {
+        
+        final File generatedFile = new File(targetDirectory, generatedFileName);
+        final File parent = new File(generatedFile.getParent());
+        parent.mkdirs();
 
         Template tpl = null;
         try {
             tpl = engine.getTemplate(getResourcePath(templateFile));
+        /* CHECKSTYLE:OFF */
         } catch (Exception e) {
+        /* CHECKSTYLE:ON */
             throw new MojoExecutionException("cannot load template " + templateFile, e);
         }
 
-        VelocityContext ctx = new VelocityContext();
+        final VelocityContext ctx = new VelocityContext();
         ctx.put("generator", this);
         ctx.put("args", args);
 
@@ -285,7 +317,7 @@ public class Generator implements LogChute {
             throw new MojoExecutionException("cannot create file " + generatedFile, e);
         }
         try {
-            LOG.info("Generating " + generatedFile + "...");
+            log.info("Generating " + generatedFile + "...");
             tpl.merge(ctx, w);
             w.close();
         } catch (IOException e) {
@@ -293,24 +325,37 @@ public class Generator implements LogChute {
         }
     }
 
+    /**
+     * Includes another file.
+     *
+     * @param templateFile the template file
+     * @return the included file
+     * @throws MojoExecutionException if execution failed
+     */
+    // used by templates
     public String includeFile(String templateFile) throws MojoExecutionException {
-        Template tpl = null;
+        final Template template;
+        
         try {
-            tpl = engine.getTemplate(getResourcePath(templateFile));
+            template = engine.getTemplate(getResourcePath(templateFile));
+        /* CHECKSTYLE:OFF */
         } catch (Exception e) {
+        /* CHECKSTYLE:ON */
             throw new MojoExecutionException("cannot load template " + templateFile, e);
         }
 
-        VelocityContext ctx = new VelocityContext();
+        final VelocityContext ctx = new VelocityContext();
         ctx.put("generator", this);
 
-        StringWriter w = new StringWriter();
+        final StringWriter writer = new StringWriter();
+        
         try {
-            tpl.merge(ctx, w);
+            template.merge(ctx, writer);
         } catch (IOException e) {
             throw new MojoExecutionException("cannot merge template", e);
         }
-        return w.toString();
+        
+        return writer.toString();
     }
-
+    
 }

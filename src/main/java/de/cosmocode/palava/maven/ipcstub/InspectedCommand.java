@@ -19,32 +19,44 @@ package de.cosmocode.palava.maven.ipcstub;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import de.cosmocode.palava.ipc.IpcCommand;
+import de.cosmocode.palava.ipc.IpcCommand.Description;
+import de.cosmocode.palava.ipc.IpcCommand.Meta;
+import de.cosmocode.palava.ipc.IpcCommand.Param;
+import de.cosmocode.palava.ipc.IpcCommand.Params;
+import de.cosmocode.palava.ipc.IpcCommand.Return;
+import de.cosmocode.palava.ipc.IpcCommand.Returns;
+import de.cosmocode.palava.ipc.IpcCommand.Throw;
+import de.cosmocode.palava.ipc.IpcCommand.Throws;
 
 /**
+ * A wrapper around an {@link IpcCommand} class which provides easy retrieval of
+ * meta information.
+ * 
  * @author Tobias Sarnowski
  */
-public class InspectedCommand {
+public final class InspectedCommand {
 
-    private Class<? extends IpcCommand> command;
+    private final Class<? extends IpcCommand> command;
 
-    public static InspectedCommand inspectCommand(Class<? extends IpcCommand> command) {
-        return new InspectedCommand(command);
+    private InspectedCommand(Class<? extends IpcCommand> command) {
+        this.command = Preconditions.checkNotNull(command, "Command");
     }
-
-    protected InspectedCommand(Class<? extends IpcCommand> command) {
-        this.command = command;
-    }
-
 
     public Class<? extends IpcCommand> getCommand() {
         return command;
     }
 
+    /**
+     * Provides the description of this command.
+     *
+     * @return the description
+     */
     public String getDescription() {
-        final IpcCommand.Description description = command.getAnnotation(IpcCommand.Description.class);
+        final Description description = command.getAnnotation(Description.class);
         if (description == null) {
             return "";
         } else {
@@ -52,33 +64,45 @@ public class InspectedCommand {
         }
     }
 
+    /**
+     * Checks whether this command is deprecated.
+     *
+     * @return true if deprecated, false otherwise
+     */
     public boolean isDeprecated() {
-        final Deprecated deprecated = command.getAnnotation(Deprecated.class);
-        return Boolean.valueOf(deprecated != null);
+        return command.isAnnotationPresent(Deprecated.class);
     }
 
-
+    /**
+     * Checks whether this command has any meta information.
+     *
+     * @return true if meta information are present, false otherwise.
+     */
     public boolean hasMetaInformations() {
-        for (Annotation a : command.getAnnotations()) {
-            if (a.annotationType().isAnnotationPresent(IpcCommand.Meta.class)) {
+        for (Annotation annotation : command.getAnnotations()) {
+            if (annotation.annotationType().isAnnotationPresent(Meta.class)) {
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     * Checks whether this command has {@link Param}s defined.
+     *
+     * @return a list of all {@link Param}s.
+     */
+    public List<Param> getParams() {
+        final List<Param> parameters = Lists.newArrayList();
 
-    public List<IpcCommand.Param> getParams() {
-        final List<IpcCommand.Param> parameters = Lists.newArrayList();
-
-        final IpcCommand.Param param = command.getAnnotation(IpcCommand.Param.class);
+        final Param param = command.getAnnotation(Param.class);
         if (param != null) {
             parameters.add(param);
         }
 
-        final IpcCommand.Params params = command.getAnnotation(IpcCommand.Params.class);
+        final Params params = command.getAnnotation(Params.class);
         if (params != null) {
-            for (IpcCommand.Param p : params.value()) {
+            for (Param p : params.value()) {
                 parameters.add(p);
             }
         }
@@ -86,17 +110,22 @@ public class InspectedCommand {
         return parameters;
     }
 
-    public List<IpcCommand.Throw> getThrows() {
-        final List<IpcCommand.Throw> throwables = Lists.newArrayList();
+    /**
+     * Checks whether this command has {@link Throw}s defined.
+     *
+     * @return a list of all {@link Throw}s.
+     */
+    public List<Throw> getThrows() {
+        final List<Throw> throwables = Lists.newArrayList();
 
-        final IpcCommand.Throw throwAnnotation = command.getAnnotation(IpcCommand.Throw.class);
+        final Throw throwAnnotation = command.getAnnotation(Throw.class);
         if (throwAnnotation != null) {
             throwables.add(throwAnnotation);
         }
 
-        final IpcCommand.Throws throwsAnnotation = command.getAnnotation(IpcCommand.Throws.class);
+        final Throws throwsAnnotation = command.getAnnotation(Throws.class);
         if (throwsAnnotation != null) {
-            for (IpcCommand.Throw t : throwsAnnotation.value()) {
+            for (Throw t : throwsAnnotation.value()) {
                 throwables.add(t);
             }
         }
@@ -104,21 +133,38 @@ public class InspectedCommand {
         return throwables;
     }
 
-    public List<IpcCommand.Return> getReturns() {
-        final List<IpcCommand.Return> returns = Lists.newArrayList();
+    /**
+     * Checks whether this command has {@link Return}s defined.
+     *
+     * @return a list of all {@link Return}s.
+     */
+    public List<Return> getReturns() {
+        final List<Return> returns = Lists.newArrayList();
 
-        final IpcCommand.Return returnAnnotation = command.getAnnotation(IpcCommand.Return.class);
+        final Return returnAnnotation = command.getAnnotation(Return.class);
         if (returnAnnotation != null) {
             returns.add(returnAnnotation);
         }
 
-        final IpcCommand.Returns returnsAnnotation = command.getAnnotation(IpcCommand.Returns.class);
+        final Returns returnsAnnotation = command.getAnnotation(Returns.class);
         if (returnsAnnotation != null) {
-            for (IpcCommand.Return r : returnsAnnotation.value()) {
+            for (Return r : returnsAnnotation.value()) {
                 returns.add(r);
             }
         }
 
         return returns;
     }
+
+    /**
+     * Static factory method for {@link InspectedCommand}s.
+     *
+     * @param command the command being inspected
+     * @return an {@link InspectedCommand}
+     * @throws NullPointerException if command is null
+     */
+    public static InspectedCommand inspectCommand(Class<? extends IpcCommand> command) {
+        return new InspectedCommand(command);
+    }
+    
 }

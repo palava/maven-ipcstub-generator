@@ -1,65 +1,72 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-
-	<parent>
-		<artifactId>palava-parent</artifactId>
-		<groupId>de.cosmocode.palava</groupId>
-		<version>2.4.0</version>
-	</parent>
-
-	<name>Palava IPC Maven Stub Generator</name>
-	<artifactId>maven-ipcstub-generator</artifactId>
-	<version>1.1-SNAPSHOT</version>
-
-	<packaging>maven-plugin</packaging>
-
-	<scm>
-		<developerConnection>scm:svn:https://palava.svn.cosmocode.de/maven-ipcstub-generator/trunk</developerConnection>
-	</scm>
-	<repositories>
-		<repository>
-			<id>cosmocode-public</id>
-			<name>CosmoCode Public Maven Repository</name>
-			<url>http://mvn.cosmocode.de/</url>
-		</repository>
-	</repositories>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-plugin-api</artifactId>
-			<version>2.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-project</artifactId>
-			<version>2.2.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>de.cosmocode</groupId>
-			<artifactId>cosmocode-classpath</artifactId>
-			<version>[1.0,2)</version>
-		</dependency>
-		<dependency>
-			<groupId>de.cosmocode.palava</groupId>
-			<artifactId>palava-ipc</artifactId>
-			<version>[1.0,2)</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
-			<version>1.6.3</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.4</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>1.4</version>
-		</dependency>
-	</dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>palava-parent</artifactId>
+    <groupId>de.cosmocode.palava</groupId>
+    <version>2.5.0</version>
+  </parent>
+  <name>Palava IPC Maven Stub Generator</name>
+  <artifactId>maven-ipcstub-generator</artifactId>
+  <version>1.1-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+  <scm>
+    <developerConnection>scm:svn:https://palava.svn.cosmocode.de/maven-ipcstub-generator/trunk</developerConnection>
+  </scm>
+  <repositories>
+    <repository>
+      <id>cosmocode-public</id>
+      <name>CosmoCode Public Maven Repository</name>
+      <url>http://mvn.cosmocode.de/</url>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+      <version>2.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>de.cosmocode</groupId>
+      <artifactId>cosmocode-commons</artifactId>
+      <version>[1.17,2)</version>
+    </dependency>
+    <dependency>
+      <groupId>de.cosmocode.palava</groupId>
+      <artifactId>palava-ipc</artifactId>
+      <version>[1.0,2)</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+      <version>1.6.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.4</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

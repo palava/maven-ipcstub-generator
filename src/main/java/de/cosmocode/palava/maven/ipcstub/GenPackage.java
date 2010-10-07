@@ -20,19 +20,25 @@ import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import de.cosmocode.palava.ipc.IpcCommand;
 
 /**
+ * A small value object for commands and packages.
+ * 
  * @author Tobias Sarnowski
  */
 public class GenPackage {
+    
     // this package's name
-    private String name;
+    private final String fullName;
 
+    private final String name;
+    
     // this package's parent
-    private GenPackage parent;
+    private final GenPackage parent;
 
     // list of all subpackages
     private Set<GenPackage> packages = Sets.newLinkedHashSet();
@@ -40,24 +46,24 @@ public class GenPackage {
     // list of all commands in this package
     private Set<GenCommand> commands = Sets.newLinkedHashSet();
 
-
-    protected GenPackage(String name, GenPackage parent) {
-        this.name = name;
+    protected GenPackage(String fullName, GenPackage parent) {
+        this.fullName = Preconditions.checkNotNull(fullName, "FullName");
+        final int index = fullName.lastIndexOf(".");
+        if (index > 0) {
+            this.name = fullName.substring(index + 1);
+        } else {
+            this.name = fullName;
+        }
+        
         this.parent = parent;
     }
 
-
     public String getName() {
-        int index = name.lastIndexOf(".");
-        if (index > 0) {
-            return name.substring(index + 1);
-        } else {
-            return name;
-        }
+        return name;
     }
 
     public String getFullName() {
-        return name;
+        return fullName;
     }
 
     public GenPackage getParent() {
@@ -82,14 +88,19 @@ public class GenPackage {
 
 
     /**
-     * Parses the given commands
+     * Parses the given commands.
+     * 
      * @param classes all commands to process
+     * @param parent the parent package
      * @return the new tree structure
+     * @throws MojoExecutionException if execution failed
      */
-    protected static Set<GenPackage> getFirstPackages(Set<Class<? extends IpcCommand>> classes, GenPackage parent) throws MojoExecutionException {
-        Set<GenPackage> packages = Sets.newLinkedHashSet();
+    protected static Set<GenPackage> getFirstPackages(Set<Class<? extends IpcCommand>> classes, 
+        GenPackage parent) throws MojoExecutionException {
+        
+        final Set<GenPackage> packages = Sets.newLinkedHashSet();
 
-        for (Class<? extends IpcCommand> command: classes) {
+        for (Class<? extends IpcCommand> command : classes) {
             // within the right package?
             String className;
             if (parent != null) {
@@ -104,20 +115,18 @@ public class GenPackage {
                 className = command.getName();
             }
             // we just need the first element
-            int index = className.indexOf(".");
+            final int index = className.indexOf(".");
             if (index == 0) {
                 throw new MojoExecutionException("invalid class definition found: " + command.getName());
             } else if (index == -1) {
-                // found a command
-                if (parent == null) {
-                    throw new MojoExecutionException("found an IpcCommand without a package: " + command.getName());
-                }
+                Preconditions.checkNotNull(parent, "Parent");
                 parent.addCommand(new GenCommand(command));
             } else {
                 // found a package, do we have it already?
-                String pkgName = command.getName().substring(0, command.getName().length() - className.length() + index);
+                final String pkgName = command.getName().substring(0, 
+                    command.getName().length() - className.length() + index);
                 boolean found = false;
-                for (GenPackage pkg: packages) {
+                for (GenPackage pkg : packages) {
                     if (pkg.getFullName().equals(pkgName)) {
                         found = true;
                         break;
@@ -125,8 +134,8 @@ public class GenPackage {
                 }
                 if (!found) {
                     // we don't have it, create it
-                    GenPackage genPackage = new GenPackage(pkgName, parent);
-                    for (GenPackage pkg: getFirstPackages(classes, genPackage)) {
+                    final GenPackage genPackage = new GenPackage(pkgName, parent);
+                    for (GenPackage pkg : getFirstPackages(classes, genPackage)) {
                         genPackage.addPackage(pkg);
                     }
                     packages.add(genPackage);

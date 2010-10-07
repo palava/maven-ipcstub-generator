@@ -19,11 +19,13 @@ package de.cosmocode.palava.maven.ipcstub;
 import de.cosmocode.palava.ipc.IpcCommand;
 
 /**
+ * A wrapper around an {@link IpcCommand} class.
+ * 
  * @author Tobias Sarnowski
  */
 public class GenCommand {
-    // the command to inspect
-    private Class<? extends IpcCommand> command;
+    
+    private final Class<? extends IpcCommand> command;
 
     protected GenCommand(Class<? extends IpcCommand> command) {
         this.command = command;
@@ -40,4 +42,5 @@ public class GenCommand {
     public InspectedCommand getMeta() {
         return InspectedCommand.inspectCommand(command);
     }
+    
 }
