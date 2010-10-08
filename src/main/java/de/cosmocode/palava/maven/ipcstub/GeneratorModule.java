@@ -107,7 +107,7 @@ public class GeneratorModule extends AbstractMojo {
 
         // search for IpcCommands in all required packages
         final Set<Class<? extends IpcCommand>> foundClasses = Sets.newTreeSet(Reflection.orderByName());
-        foundClasses.addAll(generateCommandList(allPackages));
+        Iterables.addAll(foundClasses, generateCommandList(allPackages));
 
         log.info("Found " + foundClasses.size() + " IpcCommands; generating stubs...");
 
@@ -131,7 +131,7 @@ public class GeneratorModule extends AbstractMojo {
         }
     }
 
-    private Collection<Class<? extends IpcCommand>> generateCommandList(Set<String> packages) 
+    private Iterable<Class<? extends IpcCommand>> generateCommandList(Set<String> packages) 
         throws MojoExecutionException {
         
         // create the classpath to use
@@ -162,7 +162,7 @@ public class GeneratorModule extends AbstractMojo {
         final String value = Joiner.on(File.pathSeparator).join(locations);
         final Classpath cp = Reflection.classpathOf(value);
         final Predicate<Class<?>> predicate = Reflection.isConcreteClass();
-        return Sets.newLinkedHashSet(cp.restrictTo(packages).filter(IpcCommand.class, predicate));
+        return cp.restrictTo(packages).filter(IpcCommand.class, predicate);
     }
 
     /**
