@@ -37,8 +37,6 @@ import org.apache.velocity.runtime.log.LogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.codehaus.plexus.util.StringUtils;
 
-import com.google.common.collect.Maps;
-
 import de.cosmocode.palava.ipc.IpcCommand;
 
 /**
